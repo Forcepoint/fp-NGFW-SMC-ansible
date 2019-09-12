@@ -1,0 +1,109 @@
+- name: Firewall Template
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Firewall template
+    engine:
+      smc_logging:
+        level: 10
+        path: ansible-smc.log
+      antispoofing_network:
+        group:
+        - group1
+        host:
+        - 2.2.2.23
+        network:
+        - network-5.5.5.0/24
+        - network-50.50.50.0/24
+      antivirus: true
+      bgp:
+        announced_network:
+        - network:
+            name: network-1.1.1.0/24
+            route_map: myroutemap
+        autonomous_system:
+          as_number: 200
+          comment: null
+          name: as-200
+        bgp_peering:
+        - external_bgp_peer: bgppeer
+          interface_id: '1000'
+          name: bgppeering
+        bgp_profile: Default BGP Profile
+        enabled: true
+        router_id: 2.3.4.5
+      default_nat: true
+      domain_server_address:
+      - name: 8.8.8.8
+        type: ipaddress
+      - name: Localhost
+        type: host
+      file_reputation: true
+      interfaces:
+      - interface_id: '1000'
+        interfaces:
+        - nodes:
+          - address: 10.10.10.1
+            network_value: 10.10.10.1/32
+            nodeid: 1
+        type: tunnel_interface
+      - interface_id: '2'
+        interfaces:
+        - nodes:
+          - address: 21.21.21.21
+            network_value: 21.21.21.0/24
+            nodeid: 1
+          vlan_id: '1'
+      - interface_id: '1'
+        interfaces:
+        - nodes:
+          - address: 2.2.2.1
+            network_value: 2.2.2.0/24
+            nodeid: 1
+      - interface_id: '0'
+        interfaces:
+        - nodes:
+          - address: 1.1.1.1
+            network_value: 1.1.1.0/24
+            nodeid: 1
+      - interface_id: SWP_0
+        appliance_switch_module: 110
+        type: switch_physical_interface
+        port_group_interface:
+        - interface_id: SWP_0.4
+          switch_physical_interface_port:
+          - switch_physical_interface_port_comment: port 2
+            switch_physical_interface_port_number: 2
+          - switch_physical_interface_port_comment: ''
+            switch_physical_interface_port_number: 4
+          - switch_physical_interface_port_comment: ''
+            switch_physical_interface_port_number: 5
+          - switch_physical_interface_port_comment: ''
+            switch_physical_interface_port_number: 6
+      name: myfw3
+      netlinks:
+      - destination:
+        - name: host-3.3.3.3
+          type: host
+        interface_id: '2.1'
+        name: netlink-21.21.21.0
+      ospf:
+        enabled: true
+        ospf_areas:
+        - interface_id: '2.1'
+          name: myarea
+          network: 21.21.21.0/24
+        ospf_profile: Default OSPFv2 Profile
+        router_id: 1.1.1.1
+      policy_vpn:
+      - central_gateway: true
+        mobile_gateway: false
+        name: new_policy_vpn
+        satellite_gateway: false
+      primary_mgt: '0'
+      snmp:
+        snmp_agent: fooagent
+        snmp_interface:
+        - '1'
+        snmp_location: test
+      type: single_fw

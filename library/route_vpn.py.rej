@@ -1,0 +1,12 @@
+diff a/library/route_vpn.py b/library/route_vpn.py	(rejected hunks)
+@@ -516,7 +515,7 @@ class StonesoftRouteVPN(StonesoftModuleBase):
+ 
+        
+ def main():
+-    StonesoftRouteVPN()
++    ForcepointRouteVPN()
+     
+ if __name__ == '__main__':
+-    main()
+\ No newline at end of file
++    main()

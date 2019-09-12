@@ -1,0 +1,23 @@
+- name: Examples for retrieving and resolving Aliases
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Show all aliases by name and type
+    alias_facts:
+
+  - name: Show alias names that include keyword 'interface'
+    alias_facts:
+      filter: interface
+      exact_match: no
+      case_sensitive: no
+  
+  - name: Show all resolved aliases for engine 'myfirewall'
+    alias_facts:
+      limit: 0
+      engine: newcluster
+  
+  - name: Show only resolved alias with 'interface' in the name for engine 'myfirewall'
+    alias_facts:
+      engine: newcluster
+      filter: interface
+      case_sensitive: no
