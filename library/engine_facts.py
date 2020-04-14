@@ -268,7 +268,7 @@ def yaml_cluster(engine):
     management = ('primary_mgt', 'backup_mgt', 'primary_heartbeat', 'backup_heartbeat')
     yaml_engine = {'name': engine.name, 'type': engine.type, 'log_server': engine.log_server.name}
     interfaces = []
-    
+
     for interface in engine.interface:
         if not isinstance(interface,
             (ClusterPhysicalInterface, Layer3PhysicalInterface, TunnelInterface,
@@ -293,6 +293,10 @@ def yaml_cluster(engine):
             
         if 'physical_interface' not in interface.typeof:
             top_itf.update(type=interface.typeof)
+        else:
+            if interface.aggregate_mode != 'none':
+                top_itf.update(aggregate_mode=interface.aggregate_mode)
+                top_itf.update(second_interface_id=interface.second_interface_id)
         
         if 'switch_physical_interface' in interface.typeof:
             top_itf.update(type='switch_physical_interface',
