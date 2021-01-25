@@ -308,6 +308,10 @@ options:
         list of string IP address identifiers. If enabling on a DHCP address, use the value specified
         in the SMC under VPN endpoints, i.e. First DHCP Interface ip. 
     type: list
+  ecmp_count:
+    description:
+      - Optional number paths count for ECMP
+    type: int
   domain_server_address:
     description:
       - A list of IP addresses to use as DNS resolvers for the firewall. Required to enable
@@ -788,6 +792,7 @@ class ForcepointEngine(ForcepointModuleBase):
             location=dict(type='str'),
             bgp=dict(type='dict'),
             ospf=dict(type='dict'),
+            ecmp_count=dict(type='int'),
             antispoofing_network=dict(type='dict'),
             netlinks=dict(type='list', default=[]),
             comment=dict(type='str'),
@@ -808,7 +813,7 @@ class ForcepointEngine(ForcepointModuleBase):
             delete_undefined_interfaces=dict(type='bool', default=False),
             state=dict(default='present', type='str', choices=['present', 'absent'])
         )
-        
+
         self.name = None
         self.type = None
         self.cluster_mode = None
@@ -818,6 +823,7 @@ class ForcepointEngine(ForcepointModuleBase):
         self.domain_server_address = None
         self.bgp = None
         self.ospf = None
+        self.ecmp_count = None
         self.antispoofing_network = None
         self.netlinks = None
         self.log_server = None
@@ -949,7 +955,6 @@ class ForcepointEngine(ForcepointModuleBase):
         
                 if cache.missing:
                     self.fail(msg='Missing external BGP Peering elements: %s' % cache.missing)
-                
                 as_system = self.bgp.get('autonomous_system', {})
                 if not engine:
                     # We are trying to enable BGP on a new engine, Autonomous System
@@ -961,13 +966,13 @@ class ForcepointEngine(ForcepointModuleBase):
                     if 'name' not in as_system or 'as_number' not in as_system:
                         self.fail(msg='Autonomous System requires a name and and '
                             'as_number value.')
-                    
+
                 networks = self.bgp.get('announced_network', [])
                 announced_networks = self.validate_and_extract_announced(networks)
                 cache.add(announced_networks)
                 if cache.missing:
                     self.fail(msg='Missing elements in announced configuration: %s' % cache.missing)
-            
+
             # Only validate OSPF if it's specifically set to enabled    
             if self.ospf and self.ospf.get('enabled', True):
                 # OSPF Profile if specified
@@ -1181,6 +1186,12 @@ class ForcepointEngine(ForcepointModuleBase):
                 if self.antispoofing_network and (engine.dynamic_routing.ospf.status \
                     or engine.dynamic_routing.bgp.status):
                     if self.update_antispoofing(engine):
+                        changed = True
+                        engine_needs_update = True
+
+                # Check if ecmp_count
+                if self.ecmp_count:
+                    if self.update_ecmp(engine):
                         changed = True
                         engine_needs_update = True
 
@@ -1538,7 +1549,7 @@ class ForcepointEngine(ForcepointModuleBase):
                     route_map = self.cache.get('route_map', dict_value.get('route_map'))
                     announced_ne_setting.append(
                         (name, route_map))
-        
+
         cfg = dict()
         if autonomous_system:
             cfg.update(autonomous_system=autonomous_system)
@@ -1549,16 +1560,16 @@ class ForcepointEngine(ForcepointModuleBase):
                 'bgp_profile', self.bgp.get('bgp_profile', None)))
         if 'router_id' in self.bgp:
             cfg.update(router_id=self.bgp.get('router_id'))
-        
+
         updated = bgp.update_configuration(
             enabled=True, **cfg)
-    
+
         if updated:
             self.results['state'].append(
                 {'name': 'bgp', 'type': 'configuration', 'action': 'updated'})
             changed = True
         return changed
-    
+
     def update_ospf(self, ospf):
         """
         Update OSPF on the engine
@@ -1650,7 +1661,7 @@ class ForcepointEngine(ForcepointModuleBase):
     def update_antispoofing(self, engine):
         """
         Update any antispoofing networks. 
-        
+
         :param Engine engine: engine reference
         :rtype: bool
         """
@@ -1658,14 +1669,29 @@ class ForcepointEngine(ForcepointModuleBase):
         elements = [self.cache.get(typeof, _element)
             for typeof, element in self.antispoofing_network.items()
             for _element in element]
-        
+
         if engine.dynamic_routing.update_antispoofing(elements):
             self.results['state'].append(
                 {'name': 'dynamic routing', 'type': 'antispoofing',
                  'action': 'updated'})
             changed = True
         return changed
-    
+
+    def update_ecmp(self, engine):
+        """
+        Update ecmp count
+
+        :param Engine engine: engine reference
+        :rtype: bool
+        """
+        changed = False
+        if engine.dynamic_routing.update_ecmp(self.ecmp_count):
+            self.results['state'].append(
+                {'name': 'dynamic routing', 'type': 'ecmp_count',
+                 'action': 'updated'})
+            changed = True
+        return changed
+
     def check_interfaces(self):
         """
         Check interfaces to validate node settings

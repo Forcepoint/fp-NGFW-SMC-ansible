@@ -238,7 +238,7 @@ from ansible.module_utils.smc_util import (
 
 try:
     from smc.vpn.route import RouteVPN, TunnelEndpoint
-    from smc.vpn.elements import ExternalGateway
+    from smc.vpn.elements import ExternalGateway, VPNProfile
     from smc.core.engine import Engine
     from smc.api.exceptions import SMCException
 except ImportError:
@@ -254,6 +254,7 @@ class ForcepointRouteVPN(ForcepointModuleBase):
             local_gw=dict(type='dict'),
             remote_gw=dict(type='dict'),
             enabled=dict(type='bool'),
+            vpn_profile_name=dict(type='str'),
             tags=dict(type='list'),
             state=dict(default='present', type='str', choices=['present', 'absent']),
             preshared_key=dict(type='str')
@@ -264,6 +265,7 @@ class ForcepointRouteVPN(ForcepointModuleBase):
         self.local_gw = None
         self.remote_gw = None
         self.tags = None
+        self.vpn_profile_name = None
         self.preshared_key = None
         
         required_if=([
@@ -397,7 +399,9 @@ class ForcepointRouteVPN(ForcepointModuleBase):
                         local_endpoint=local_gateway,
                         remote_endpoint=remote_gateway,
                         preshared_key=self.preshared_key)
-                    
+
+                    if self.vpn_profile_name:
+                        vpn['vpn_profile'] = VPNProfile(self.vpn_profile_name)
                     if is_external:
                         vpn.update(preshared_key=self.remote_gw['preshared_key'])
                     
