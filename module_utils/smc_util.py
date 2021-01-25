@@ -6,6 +6,7 @@ server.
 import inspect
 import traceback
 from ansible.module_utils.basic import AnsibleModule
+from distutils.version import StrictVersion
 
 
 try:
@@ -441,12 +442,10 @@ def is_sixdotsix_compat():
     :rtype: bool
     """
     try:
-        major, minor = '{:01.1f}'.format(session.api_version).split('.')
-        if int(major) >= 6 and int(minor) >= 6:
-            return True
+        result = StrictVersion(session.api_version) >=  StrictVersion("6.6")
     except ValueError:
         pass
-    return False
+    return result
     
 
 def smc_argument_spec():
