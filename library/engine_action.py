@@ -239,7 +239,7 @@ class ForcepointEngineAction(ForcepointModuleBase):
 
     
 def main():
-    SMCEngineAction()
+    ForcepointEngineAction()
     
 if __name__ == '__main__':
     main()
