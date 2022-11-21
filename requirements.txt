@@ -1,1 +1,1 @@
-smc-python>=0.6.1
+fp-NGFW-SMC-python>=1.0.20
