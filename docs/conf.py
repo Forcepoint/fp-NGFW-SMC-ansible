@@ -46,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'fp-NGFW-SMC-Ansible'
-copyright = u'2019, Forcepoint'
+copyright = u'2023, Forcepoint'
 author = u'Forcepoint'
 
 # The version info for the project you're documenting, acts as replacement for
