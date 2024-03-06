@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # Copyright (c) 2017-2019 Forcepoint
+import logging
 
+from smc.base.model import Element
 
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
@@ -93,6 +95,8 @@ try:
 except ImportError:
     pass
 
+logger = logging.getLogger("smc")
+
 
 def alias_dict_from_obj(alias, engine):
     """
@@ -108,7 +112,14 @@ def alias_dict_from_obj(alias, engine):
         'comment': getattr(alias, 'comment', None)}
     
     if engine:
-        elem.update(resolved_value=alias.resolve(engine))
+        resolved_values = alias.resolve(engine)
+        resolved_values_href = []
+        for resolved in resolved_values:
+            if isinstance(resolved, Element):
+                resolved = resolved.href
+            resolved_values_href.append(resolved)
+        elem.update(resolved_value=resolved_values_href)
+        logger.debug("resolved values={}".format(resolved_values_href))
     return elem
     
 

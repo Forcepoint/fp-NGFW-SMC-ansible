@@ -10,14 +10,18 @@
       filter: interface
       exact_match: no
       case_sensitive: no
-  
-  - name: Show all resolved aliases for engine 'myfirewall'
+
+  - name: Show all resolved aliases for engine 'Plano'
     alias_facts:
       limit: 0
-      engine: newcluster
+      engine: Plano
   
-  - name: Show only resolved alias with 'interface' in the name for engine 'myfirewall'
+  - name: Show only resolved alias with 'interface' in the name for engine 'Plano'
     alias_facts:
-      engine: newcluster
+      smc_api_version: 7.1
+      smc_logging:
+        level: 10
+        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
+      engine: Plano
       filter: interface
       case_sensitive: no

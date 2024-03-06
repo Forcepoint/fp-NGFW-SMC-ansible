@@ -6,9 +6,9 @@
     generic_element:
       smc_logging:
         level: 10
-        path: ansible-smc.log
+        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
       elements:
-      - vpn_profile: 
+      - vpn_profile:
           name: MyVPNProfile
           comment: mycomment
           capabilities:
@@ -26,4 +26,61 @@
             sha2_ipsec_hash_length: 256
             vpn_client_rsa_signature_for_ike: True
             vpn_client_sa_per_net: True
-          
+      - snmp_agent:
+          name: myagent
+          comment: myagentcomment
+          monitoring_user_names:
+          - testcommunity
+          snmp_version: v2c
+      - snmp_agent:
+          name: fooagent
+          comment: fooagentcomment
+          monitoring_user_names:
+          - aaaa
+          snmp_version: v2c
+      - autonomous_system:
+          name: autonomous system 1
+          as_number: 1
+      - external_bgp_peer:
+          name: bgppeer
+          neighbor_ip: 192.168.14.101
+          neighbor_as:
+            smc-reference: autonomous system 1
+      - route_map:
+          name: myroutemap
+      - vpn:
+          name: new_policy_vpn
+      - ospfv2_area:
+          name: myarea
+      - network:
+          name: network-50.50.50.0/24
+          ipv4_network: 50.50.50.0/24
+      - host:
+          name: host-2.2.2.23
+          address: 2.2.2.23
+      - host:
+          name: host-3.3.3.3
+          address: 3.3.3.3
+      - group:
+          name: group1
+          members:
+          - smc-reference: host-2.2.2.23
+          - smc-reference: host-3.3.3.3
+      - router:
+          name: myrouter2
+          address: 21.21.21.13
+      - network:
+          name: mynetwork2
+          ipv4_network: 13.13.13.0/24
+      - netlink:
+          name: netlink-21.21.21.0
+          gateway:
+            smc-reference: myrouter2
+          network:
+          - smc-reference: mynetwork2
+          domain_server_address:
+              - 8.8.8.8
+              - 8.8.7.7
+          probe_address:
+              - 10.10.10.1
+          comment: added by ansible

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # Copyright (c) 2017-2019 Forcepoint
+import logging
 
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
@@ -153,6 +154,8 @@ actions = ('initial_contact',
            'lock_online', 'lock_offline',
            'reset_user_db')
                 
+logger = logging.getLogger("smc")
+
 
 class ForcepointEngineAction(ForcepointModuleBase):
     def __init__(self):
@@ -181,35 +184,16 @@ class ForcepointEngineAction(ForcepointModuleBase):
             engine = Engine(self.name)
             node = engine.nodes.get(self.nodeid)
             if not node:
+                logger.error("Node {} not found in {}:".format(self.nodeid, engine.nodes))
                 raise SMCException('Node specified for action %r was not found. This engine '
-                    'has %s nodes (numbering starts at 1)' % (self.action, len(engine.nodes)))
+                    'has %s nodes (numbering starts at 0)' % (self.action, len(engine.nodes)))
             
             self.check_provided_args(node, self.action)
             
             # Run command
             result = getattr(node, self.action)(**self.extra_args)
             self.results['changed'] = True
-#             if self.action == 'initial_contact':
-#                 self.results['state'].append(
-#                     node.initial_contact(**self.extra_args))
-#                 #enable_ssh=True, time_zone=None, 
-#                 #keyboard=None, 
-#                 #filename=None, 
-#                 #as_base64=False
-#             elif self.action == 'change_ssh_pwd':
-#                 pass 
-#                 # pwd
-#             elif self.action == 'sginfo':
-#                 pass
-#                 #include_core_files=False, 
-#                 #include_slapcat_output=False, 
-#                 #filename='sginfo.gz'
-#             elif self.action == 'ssh':
-#                 pass
-#                 # enabled
-#             elif self.action == 'bind_license':
-#                 pass
-#                 #license_item_id
+
             self.results['state'] = self.get_state_after_action(node)
         
         except SMCException as err:
@@ -226,7 +210,7 @@ class ForcepointEngineAction(ForcepointModuleBase):
         :rtype: dict
         """
         try:
-            return node.health._asdict()
+            return node.health.data
         except NodeCommandFailed:
             return {}
         
@@ -237,10 +221,11 @@ class ForcepointEngineAction(ForcepointModuleBase):
                 self.fail(msg='Invalid argument provided to node action %r. Valid arguments '
                     'for this action are %s' % (arg, allowed))
 
-    
+
 def main():
-    SMCEngineAction()
-    
+    ForcepointEngineAction()
+
+
 if __name__ == '__main__':
     main()
 

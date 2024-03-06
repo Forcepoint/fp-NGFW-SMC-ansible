@@ -235,7 +235,6 @@ bgp_elements = (
 )
 
 
-
 class ForcepointBGPElement(ForcepointModuleBase):
     def __init__(self):
         
@@ -245,7 +244,8 @@ class ForcepointBGPElement(ForcepointModuleBase):
             state=dict(default='present', type='str', choices=['present', 'absent'])
         )
         self.elements = None
-        
+        self.check_mode = False
+
         self.results = dict(
             changed=False,
             state=[]

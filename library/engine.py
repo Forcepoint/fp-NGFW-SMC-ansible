@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # Copyright (c) 2017-2019 Forcepoint
+import logging
 
 
 ANSIBLE_METADATA = {
@@ -400,7 +401,7 @@ EXAMPLES = '''
         group:
         - group1
         host:
-        - 2.2.2.23
+        - host-2.2.2.23
         network:
         - network-5.5.5.0/24
         - network-50.50.50.0/24
@@ -455,11 +456,11 @@ EXAMPLES = '''
           - address: 1.1.1.1
             network_value: 1.1.1.0/24
             nodeid: 1
-      - interface_id: SWP_0
+      - interface_id: SWI_0
         appliance_switch_module: 110
         type: switch_physical_interface
         port_group_interface:
-        - interface_id: SWP_0.4
+        - interface_id: SWI_0.4
           switch_physical_interface_port:
           - switch_physical_interface_port_comment: port 2
             switch_physical_interface_port_number: 2
@@ -529,10 +530,11 @@ try:
     from smc.api.exceptions import SMCException, PolicyCommandFailed, \
         UnsupportedEngineFeature, InterfaceNotFound
     from smc.core.interfaces import TunnelInterface, Layer3PhysicalInterface, \
-        Layer2PhysicalInterface, ClusterPhysicalInterface, PhysicalInterface, \
-        SwitchPhysicalInterface
+    Layer2PhysicalInterface, ClusterPhysicalInterface, PhysicalInterface, \
+    SwitchInterface
 except ImportError:
     pass
+logger = logging.getLogger("smc")
 
 
 class _Interface(object):
@@ -589,8 +591,8 @@ class SingleFWInterface(_Interface):
     def as_obj(self):
         if getattr(self, 'type', None) == 'tunnel_interface':
             return TunnelInterface(**vars(self))
-        elif getattr(self, 'type', None) == 'switch_physical_interface':
-            return SwitchPhysicalInterface(**vars(self))
+        elif getattr(self, 'type', None) == 'switch_interface':
+            return SwitchInterface(**vars(self))
         return Layer3PhysicalInterface(**vars(self))
     
 
@@ -627,7 +629,7 @@ class Interfaces(object):
             yield self.type_map.get(self._type)(interface)
 
     def __contains__(self, interface_id):
-        if 'SWP_' in str(interface_id):
+        if 'SWI_' in str(interface_id):
             """ Extract switch physical interfaces """
             itf, _ = str(interface_id).split('.')
             if self.get(itf) is not None: # Top level switch exists
@@ -779,9 +781,9 @@ def open_policy(policy, internal_gw, vpn_def, delete_first=None):
     policy.close()
     return changed
     
-   
+
 class ForcepointEngine(ForcepointModuleBase):
-    def __init__(self):
+    def __init__(self, unit_test=False):
         
         self.module_args = dict(
             name=dict(type='str', required=True),
@@ -834,18 +836,21 @@ class ForcepointEngine(ForcepointModuleBase):
         self.file_reputation = None
         self.policy_vpn = False
         self.enable_vpn = []
-        self.skip_interfaces = None
+        self.skip_interfaces = False
         self.delete_undefined_interfaces = None
         self.tags = None
-        
+        self.check_mode = False
+
         self.results = dict(
             changed=False,
             engine=dict(),
             state=[]
         )
-        super(ForcepointEngine, self).__init__(self.module_args, supports_check_mode=True)
+        self.unit_test = unit_test
+
+        if not unit_test:
+            super(ForcepointEngine, self).__init__(self.module_args, supports_check_mode=True)
         
-           
     def exec_module(self, **kwargs):
         state = kwargs.pop('state', 'present')
         for name, value in kwargs.items():
@@ -1061,7 +1066,7 @@ class ForcepointEngine(ForcepointModuleBase):
                     
                 if cache.missing:
                     self.fail(msg='Missing elements in netlink configuration: %s' % cache.missing)
-            
+
             self.cache = cache
 
         try:
@@ -1070,7 +1075,7 @@ class ForcepointEngine(ForcepointModuleBase):
                 if not engine:
 
                     interfaces = [vars(intf) for intf in itf]
-                    
+                    logger.debug("interfaces={}".format(interfaces))
                     firewall = {'interfaces': interfaces}
                     firewall.update(
                         name=self.name,
@@ -1257,7 +1262,7 @@ class ForcepointEngine(ForcepointModuleBase):
                         not 'fw_cluster' in self.type:
                         continue
                     management = engine.interface.get(getattr(self, option))
-                    if not isinstance(management, (PhysicalInterface, SwitchPhysicalInterface)):
+                    if not isinstance(management, (PhysicalInterface, SwitchInterface)):
                         continue
                     if not getattr(management, 'is_%s' % option):
                         getattr(interface_options, 'set_%s' % option)(getattr(self, option))
@@ -1810,5 +1815,6 @@ class ForcepointEngine(ForcepointModuleBase):
 def main():
     ForcepointEngine()
     
+
 if __name__ == '__main__':
     main()

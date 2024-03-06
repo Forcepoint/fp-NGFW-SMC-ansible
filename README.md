@@ -4,8 +4,8 @@ This repository provides [Ansible](https://www.ansible.com)  modules for configu
 
 #### Prerequisites
 
-* smc-python >= 0.6.0
-* Forcepoint NGFW Management Center 6.x
+* smc-python >= 1.2.0
+* Forcepoint NGFW Management Center >= 6.10.x
 * API client account with permissions
 
 ### Installation
@@ -70,3 +70,10 @@ ansible-doc -s engine
 #### Contributions
 
 If you have requests for additional configuration functionality, please submit an issue request.
+
+## Documentation
+
+
+[View Documentation on Read The Docs](https://fp-ngfw-smc-ansible.readthedocs.io/en/latest/?badge=latest)
+
+

@@ -15,6 +15,7 @@ def main():
 
     # Find the module paths
     ansible_path = os.path.dirname(os.path.abspath(os.path.realpath(ansible.__file__)))
+    print('ansible path: %s' % ansible_path)
     '''
     # Check to see if appropriate directories exist
     module_utils_path = os.path.join(ansible_path, 'module_utils')
@@ -56,9 +57,23 @@ def main():
     shutil.copy(os.path.join(here_module_utils, 'smc_util.py'),
                 os.path.join(module_util_path, 'smc_util.py'))
     print("Copying smc_util.py to: %s" % module_util_path)
-    
-    
-    
-    
+
+    # Copy the base smc_lookup into plugins/lookup directory
+    lookup_path = os.path.join(ansible_path, 'plugins/lookup')
+    if not os.path.exists(lookup_path):
+        print('Could not find ansible plugins/lookup path!')
+        sys.exit(1)
+    # Check for existing .pyc
+    if os.path.exists(os.path.join(lookup_path, 'smc_lookup.pyc')):
+        os.remove(os.path.join(lookup_path, 'smc_lookup.pyc'))
+
+    here_lookup = os.path.join(here, 'plugins/lookup')
+    shutil.copy(os.path.join(here_lookup, 'smc-reference.py'),
+                os.path.join(lookup_path, 'smc-reference.py'))
+    shutil.copy(os.path.join(here_lookup, 'smc-element.py'),
+                os.path.join(lookup_path, 'smc-element.py'))
+    print("Copying smc-reference.py/smc-element.py to: %s" % lookup_path)
+
+
 if __name__ == '__main__':
     main()

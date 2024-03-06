@@ -771,6 +771,7 @@ class FirewallRule(ForcepointModuleBase):
         self.policy = None
         self.sub_policy = None
         self.rules = None
+        self.check_mode = False
         
         mutually_exclusive = [
             ['policy', 'sub_policy'],
@@ -851,11 +852,6 @@ class FirewallRule(ForcepointModuleBase):
                 
                     if 'log_options' in rule:
                         log_options = LogOptions()
-                        _log = rule['log_options']
-                        for name, value in log_options.items():
-                            if name not in _log:
-                                log_options.pop(name)
-            
                         log_options.update(rule.get('log_options', {}))
                         rule_dict.update(log_options=log_options)
 

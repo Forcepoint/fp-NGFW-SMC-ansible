@@ -247,11 +247,11 @@ def get_status(node):
     :param Node node: node from engine
     :rtype: dict
     """
-    info = node.appliance_info()._asdict()
+    info = {}
+    contact_time = datetime_from_ms(node.appliance_info().initial_contact_time)
     info.update(
-        initial_contact_time=datetime_from_ms(
-            info.pop('initial_contact_time')))
-    info.update(node.health._asdict())
+        initial_contact_time=contact_time)
+    info.update(node.health.data)
     return info
 
 
@@ -265,7 +265,8 @@ def get_filesystem(node):
     hw = node.hardware_status
     all_status = []
     for fs in hw.filesystem:
-        all_status.append(fs._asdict())
+        all_status.append({"status": fs[0]})
+        all_status.append(fs[1]._asdict())
     for lg in hw.logging_subsystem:
         all_status.append(lg._asdict())
     return all_status
@@ -351,9 +352,9 @@ class EngineApplianceFacts(ForcepointModuleBase):
         
         nodes = []
         try:
-            if self.nodeid:
+            if self.nodeid is not None:
                 node = engine[0].nodes.get(self.nodeid)
-                if not node:
+                if node is None:
                     self.fail(msg='Nodeid %s specified does not exist on this engine: %s'
                         % (self.nodeid, engine[0].name))
                 nodes.append(get_by_items(node, self.items))

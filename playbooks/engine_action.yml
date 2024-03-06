@@ -1,4 +1,4 @@
-- name: Firewall Actions
+- name: Firewall Actions (run after l3fw.yml)
   hosts: localhost
   gather_facts: no
   tasks:
@@ -7,9 +7,9 @@
     engine_action:
       smc_logging:
         level: 10
-        path: ansible-smc.log
+        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
       name: myfw3
-      nodeid: 1
+      nodeid: 0
       action: initial_contact
       extra_args:
         enable_ssh: true
@@ -20,7 +20,7 @@
   - name: Reboot node
     engine_action:
       name: myfw3
-      nodeid: 1
+      nodeid: 0
       action: go_online
       extra_args:
         comment: bringing back online

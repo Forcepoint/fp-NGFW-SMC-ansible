@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # Copyright (c) 2017-2019 Forcepoint
-
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
     'status': ['preview'],
@@ -104,14 +103,17 @@ state:
 
 import traceback
 from ansible.module_utils.smc_util import ForcepointModuleBase
-
+import logging
 
 try:
     from smc.api.exceptions import SMCException
     from smc.base.collection import Search
-    from smc.base.model import lookup_class
+    from smc.base.model import lookup_class, Element
+    from smc.api.common import fetch_meta_by_name
 except ImportError:
     pass
+
+logger = logging.getLogger("smc")
 
 
 class GenericElement(ForcepointModuleBase):
@@ -127,9 +129,13 @@ class GenericElement(ForcepointModuleBase):
             changed=False,
             state=[]
         )
+
+        self.check_mode = False
+
         super(GenericElement, self).__init__(self.module_args, supports_check_mode=True)
 
     def exec_module(self, **kwargs):
+        logger.debug("data={}".format(kwargs))
         state = kwargs.pop('state', 'present')
         for name, value in kwargs.items():
             setattr(self, name, value)
@@ -151,10 +157,41 @@ class GenericElement(ForcepointModuleBase):
                 return self.results
 
             for element in self.elements:
-                for typeof, data in element.items():
+                logger.debug("Element={} type={}".format(element, type(element)))
+                for typeof, data in element.copy().items():
                     try:
+                        logger.debug("Update_or_create: Typof={} Data={}".format(typeof, data))
+                        json_payload = dict()
+                        for attribute, value in data.copy().items():
+                            logger.debug("attribute={} value={}".format(attribute, value))
+                            if type(value) is dict:
+                                reference_name = value.get("smc-reference")
+                                if reference_name is not None:
+                                    result = fetch_meta_by_name(reference_name)
+                                    if len(result.json) == 0:
+                                        self.fail(msg="reference {} not found".format(value))
+                                    value = result.json[0].get("href")
+                                    logger.debug("Updated: reference found={}".format(value))
+                            if type(value) is list:
+                                value_list = []
+                                for sub_value in value.copy():
+                                    logger.debug("Updated: sub-value={}".format(sub_value))
+                                    if type(sub_value) is dict:
+                                        reference_name = sub_value.get("smc-reference")
+                                        if reference_name is not None:
+                                            result = fetch_meta_by_name(reference_name)
+                                            if len(result.json) == 0:
+                                                self.fail(msg="reference {} not found".format(value))
+                                            sub_value = result.json[0].get("href")
+                                            logger.debug("Updated: reference found in list={}".format(sub_value))
+                                    value_list.append(sub_value)
+                                value = value_list
+
+                            json_payload[attribute] = value
+
                         instance, updated, created = lookup_class(typeof).update_or_create(
-                            with_status=True, **data)
+                            with_status=True, **json_payload)
+                        logger.debug("instance={} updated={} created={}".format(instance, updated, created))
 
                         action = 'none'
 
@@ -170,16 +207,20 @@ class GenericElement(ForcepointModuleBase):
                             typeof=instance.typeof, action=action))
 
                     except SMCException as e:
+                        logger.error("Exception={}".format(str(e)))
                         self.results['state'].append(dict(name=data.get('name'),
                             typeof=typeof, action='error', reason=str(e)))
 
         except SMCException as err:
             self.fail(msg=str(err), exception=traceback.format_exc())
 
+        logger.debug("result={}".format(self.results))
         return self.results
+
 
 def main():
     GenericElement()
-    
+
+
 if __name__ == '__main__':
     main()

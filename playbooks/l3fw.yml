@@ -4,14 +4,16 @@
   tasks:
   - name: Firewall template
     engine:
+      smc_api_version: 7.1
+      smc_address: http://127.0.0.1:8082
       smc_logging:
         level: 10
-        path: ansible-smc.log
+        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
       antispoofing_network:
         group:
         - group1
         host:
-        - 2.2.2.23
+        - host-2.2.2.23
         network:
         - network-5.5.5.0/24
         - network-50.50.50.0/24
@@ -66,20 +68,20 @@
           - address: 1.1.1.1
             network_value: 1.1.1.0/24
             nodeid: 1
-      - interface_id: SWP_0
-        appliance_switch_module: 110
-        type: switch_physical_interface
+      - interface_id: SWI_0
+        appliance_switch_module: 110 appliance (8 fixed ports)
+        type: switch_interface
         port_group_interface:
-        - interface_id: SWP_0.4
-          switch_physical_interface_port:
-          - switch_physical_interface_port_comment: port 2
-            switch_physical_interface_port_number: 2
-          - switch_physical_interface_port_comment: ''
-            switch_physical_interface_port_number: 4
-          - switch_physical_interface_port_comment: ''
-            switch_physical_interface_port_number: 5
-          - switch_physical_interface_port_comment: ''
-            switch_physical_interface_port_number: 6
+        - interface_id: SWI_0.4
+          switch_interface_port:
+          - switch_interface_port_comment: port 2
+            physical_switch_port_number: 2
+          - switch_interface_port_comment: ''
+            physical_switch_port_number: 4
+          - switch_interface_port_comment: ''
+            physical_switch_port_number: 5
+          - switch_interface_port_comment: ''
+            physical_switch_port_number: 6
       name: myfw3
       netlinks:
       - destination:

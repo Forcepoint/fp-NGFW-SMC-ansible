@@ -79,7 +79,7 @@
             name: myas123
             as_number: '123.123'
             comment: foo comment
-      state: absent
+      state: present
       #overwrite_existing: true
         
 

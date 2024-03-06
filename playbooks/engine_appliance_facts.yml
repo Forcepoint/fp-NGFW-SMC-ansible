@@ -4,18 +4,29 @@
   tasks:
   - name: Retrieve all stats (hardware, interface, info)
     engine_appliance_facts:
-      filter: sg_vm
+      smc_logging:
+        level: 10
+        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
+      filter: Plano
+      nodeid: 0
 
   - name: Retrieve only interface info for all nodes
     engine_appliance_facts:
-      filter: sg_vm
+      smc_logging:
+        level: 10
+        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
+      filter: Plano
+      nodeid: 0
       items:
       - interfaces
 
   - name: Retrieve all info from node 1 (this is redundant, you can leave items empty)
     engine_appliance_facts:
-      filter: sg_vm
-      nodeid: 1
+      smc_logging:
+        level: 10
+        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
+      filter: Plano
+      nodeid: 0
       items:
       - interfaces
       - filesystem

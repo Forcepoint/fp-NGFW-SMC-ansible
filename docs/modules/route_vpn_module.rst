@@ -157,7 +157,7 @@ Options
         <td></td>
         <td></td>
         <td>
-            <div>If this is an external VPN gateway, you must provide a pre-shared key to be used between the gateways. If the gateway is another Forcepoint NGFW Engine, a key will be auto-generated.</div>
+            <div>A pre-shared key to be used between the gateways.</div>
         </td>
         </tr>
 

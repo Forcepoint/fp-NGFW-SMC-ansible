@@ -1,0 +1,57 @@
+- name: createANYpolicy
+  hosts: localhost
+  vars:
+    policy_name: asimpleanypolicy
+    network_cidr: 192.168.0.0/16
+  gather_facts: no
+  tasks:
+  - name: Create a new firewall policy
+    l3fw_policy:
+      name: "{{policy_name}}"
+  - name: Create internal network element
+    network_element:
+      elements:
+        - network:
+            name: Internal Addresses
+            ipv4_network: "{{network_cidr}}"
+  - name: Add initial policy IPv4 access rule
+    firewall_rule:
+      smc_logging:
+        level: 10
+        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
+      policy: "{{policy_name}}"
+      rules:
+        - name: anyrule
+          comment: an allow rule
+          source:
+            any: true
+          destination:
+            any: true
+          services:
+            ip_service:
+              - TCP
+          log_options:
+             log_level: stored
+  - name: Add IPv4 NAT rule for outbound HTTP connectivity
+    firewall_nat_rule:
+      policy: "{{policy_name}}"
+      rules:
+        - comment: Dynamic source nat with ports and IP redirect
+          destinations:
+            any: true
+          dynamic_src_nat:
+            automatic_proxy: true
+            translated_value:
+              name: $$ Interface ID 0.ip
+              type: alias
+              max_port: 60000
+              min_port: 1024
+          is_disabled: false
+          name: NAT rule
+          services:
+            tcp_service:
+              - HTTP
+              - HTTPS
+          sources:
+            network:
+            - Internal Addresses
