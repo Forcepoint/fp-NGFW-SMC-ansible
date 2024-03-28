@@ -176,7 +176,7 @@ def get_method_argspec(clazz, method=None):
 
     :rtype: tuple
     """
-    argspec = inspect.getargspec(getattr(clazz, method if method else 'create'))
+    argspec = inspect.getfullargspec(getattr(clazz, method if method else 'create'))
     valid_args = argspec.args[1:]
     args = []
     if argspec.defaults:
