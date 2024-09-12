@@ -341,18 +341,18 @@ def yaml_cluster(engine):
             continue
          
         if interface.has_interfaces:
-            _interfaces = []    
-            nodes = {}
+            _interfaces = []
+            nodes = list()
             for sub_interface in interface.all_interfaces:
                 node = {}
                 if isinstance(sub_interface, ClusterVirtualInterface):
-                    nodes.update(
+                    node.update(
                         cluster_virtual=sub_interface.address,
                         network_value=sub_interface.network_value)
 
                     # Skip remaining to get nodes
-                    continue
-                else: # NDI
+                    # continue
+                else:  # NDI
                     # Dynamic address
                     if getattr(sub_interface, 'dynamic', None):
                         node.update(dynamic=True, dynamic_index=
@@ -371,10 +371,26 @@ def yaml_cluster(engine):
 #                             if getattr(sub_interface, role, None):
 #                                 yaml_engine[role] = getattr(sub_interface, 'nicid')    
 
-                nodes.setdefault('nodes', []).append(node)
-            
+                nodes.append(node)
+            # segregate associated CVI's+ NID's
+            temp_dict = {}
+            dynamic_interface = list()
+            for node in nodes:
+                nv = node.get('network_value')
+                if nv:
+                    if nv not in temp_dict:
+                        temp_dict[nv] = {'nodes': []}
+                    if 'cluster_virtual' in node:
+                        temp_dict[nv].update(node)
+                    else:
+                        temp_dict[nv]['nodes'].append(node)
+                else:
+                    dynamic_interface.append(node)
+
+            nodes = list(temp_dict.values())
             if nodes:
-                _interfaces.append(nodes)
+                nodes[0]['nodes'].extend(dynamic_interface)
+                _interfaces.extend(nodes)
             if _interfaces:
                 top_itf.update(interfaces=_interfaces)
         

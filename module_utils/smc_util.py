@@ -29,6 +29,7 @@ try:
     from smc.api.exceptions import ConfigLoadError, SMCException, \
         UserElementNotFound, ElementNotFound, DeleteElementFailed, \
         UnsupportedEntryPoint
+    from smc.elements.common import ThirdPartyMonitoring
     HAS_LIB = True
 except ImportError:
     HAS_LIB = False
@@ -434,6 +435,11 @@ def element_dict_from_obj(element, type_dict, expand=None):
                 else:
                     elem[attribute] = getattr(element, attribute, None)
             else:
+                if attribute == 'third_party_monitoring':
+                    attr_value = getattr(element, attribute, None)
+                    elem[attribute] = attr_value.data \
+                        if isinstance(attr_value, ThirdPartyMonitoring) else attr_value
+                    continue
                 elem[attribute] = getattr(element, attribute, None)
         return elem
     else:
