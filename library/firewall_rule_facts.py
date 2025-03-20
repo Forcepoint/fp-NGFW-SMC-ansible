@@ -165,6 +165,7 @@ from ansible.module_utils.smc_util import ForcepointModuleBase
 try:
     from smc.api.exceptions import SMCException
     from smc.policy.layer3 import FirewallPolicy
+    from smc.policy.layer3 import FirewallSubPolicy
 except ImportError:
     pass
 
@@ -277,7 +278,8 @@ class FirewallRuleFacts(ForcepointModuleBase):
         
         rules = []
         try:
-            policy = self.search_by_type(FirewallPolicy)
+            policy = self.search_by_type(FirewallPolicy) or \
+                     self.search_by_type(FirewallSubPolicy)
             if not policy:
                 self.fail(msg='Policy specified could not be found: %s' % self.filter)
             elif len(policy) > 1:
