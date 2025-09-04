@@ -79,7 +79,7 @@ except ImportError:
     
     
 class EngineRoutingFacts(ForcepointModuleBase):
-    def __init__(self):
+    def __init__(self, unit_test=False):
         
         self.module_args = dict(
             filter=dict(type='str', required=True)
@@ -87,13 +87,18 @@ class EngineRoutingFacts(ForcepointModuleBase):
         
         self.element = 'engine_clusters'
         self.filter = None
-        
+        self.limit = 1
+        self.exact_match = None
+        self.case_sensitive = None
+
         self.results = dict(
             ansible_facts=dict(
                 engines=[]
             )
         )
-        super(EngineRoutingFacts, self).__init__(self.module_args, is_fact=True)
+
+        if not unit_test:
+            super(EngineRoutingFacts, self).__init__(self.module_args, is_fact=True)
 
     def exec_module(self, **kwargs):
         for name, value in kwargs.items():
@@ -106,7 +111,7 @@ class EngineRoutingFacts(ForcepointModuleBase):
         try:
             self.results['ansible_facts']['engines'] = [rt._asdict()
                 for rt in engine[0].routing_monitoring]
-            
+
         except SMCException as err:
             self.fail(msg=str(err), exception=traceback.format_exc())
         

@@ -1,1 +1,1 @@
-fp-NGFW-SMC-python>=1.0.24
+fp-NGFW-SMC-python>=1.0.30

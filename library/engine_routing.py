@@ -1,5 +1,8 @@
 #!/usr/bin/python
 # Copyright (c) 2017-2019 Forcepoint
+from smc.elements.netlink import StaticNetlink
+from smc.routing.bgp import BGPPeering
+from smc.routing.ospf import OSPFArea
 
 ANSIBLE_METADATA = {
     'metadata_version': '1.1',
@@ -482,13 +485,18 @@ class ForcepointEngineRouting(ForcepointModuleBase):
                     destinations = [self.cache.get(dest.get('type'), dest.get('name'))
                         for dest in it.get('destination', [])]
                     # BGP Peering and OSPF areas are non-list destinations
-                    if routing in ('ospfv2_area', 'bgp_peering'):
+                    if routing == 'bgp_peering':
                         destinations = destinations[0]
-                        # TODO: Implement unicast ref for OSPF
-                        #if 'communication_mode' in it:
-                        #    kwargs = {'unicast_ref': self.cache.get(
-                        #        dest.get('host'), dest.get('unicast_ref'))}
-                    
+                        element = BGPPeering.get_or_create(name=it.get('name'))
+                    elif routing == 'ospfv2_area':
+                        destinations = destinations[0]
+                        element = OSPFArea.get_or_create(name=it.get('name'))
+                    elif routing == 'netlink':
+                        element = StaticNetlink.get_or_create(name=it.get('name'))
+
+                if element is None:
+                    self.fail(msg='Routing element not found %s' % (it.get('name')))
+
                 # Order of args: element, destination, network
                 # destination and network can be None or []
                 modified = getattr(routing_node, mapper.get(routing))(

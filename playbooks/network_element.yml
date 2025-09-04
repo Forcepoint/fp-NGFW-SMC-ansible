@@ -9,7 +9,10 @@
         level: 10
         path: ansible-smc.log
       elements:
-        - host: 
+        - host:
+            name: hosta
+            address: 1.1.10.11
+        - host:
             name: hostb
             address: 1.1.1.1
             ipv6_address: 2001:0db8:85a3:0000:0000:8a2e:0370:7334
@@ -28,6 +31,9 @@
             name: myzone
         - domain_name:
             name: mydomain.com
+            domain_name_entry:
+              - test1
+              - test2
             comment: foo
         - router:
             name: myrouter
@@ -53,8 +59,6 @@
                 - hostb
                 network:
                 - networka
-                engine:
-                - myfw
         - group:
             name: emptyregulargrp
             members:

@@ -75,8 +75,8 @@ options:
     description:
       - Whether to enable default NAT on the firewall. Default NAT will identify
         internal networks and use the external interface IP for outgoing traffic
-    type: bool
-    default: false
+    type: str
+    default: automatic
   domain_server_address:
     description:
       - A list of IP addresses to use as DNS resolvers for the firewall.
@@ -208,7 +208,7 @@ class ForcepointFirewall(ForcepointModuleBase):
         self.module_args = dict(
             name=dict(type='str', required=True),
             mgmt_interface=dict(type='int', default=0),
-            default_nat=dict(default=False, type='bool'),
+            default_nat=dict(default='automatic', type='str'),
             domain_server_address=dict(default=[], type='list'),
             interfaces=dict(type='list'),
             location=dict(type='str'),
@@ -314,15 +314,9 @@ class ForcepointFirewall(ForcepointModuleBase):
                 else: # Engine exists, check for modifications
                     # Start with engine properties..
                     status = engine.default_nat.status
-                    if self.default_nat:
-                        if not status:
-                            engine.default_nat.enable()
-                            changed = True
-                    else: # False or None
-                        if status:
-                            engine.default_nat.disable()
-                            changed = True
-                    
+                    if self.default_nat is not None and str(self.default_nat).lower() != status:
+                        engine.default_nat.status = self.default_nat
+                        changed = True
                     status = engine.antivirus.status
                     if self.enable_antivirus:
                         if not status:

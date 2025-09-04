@@ -1,0 +1,34 @@
+- name: Add interface and routing
+  hosts: localhost
+  gather_facts: no
+  tasks:
+  - name: Add new interface
+    engine:
+      smc_api_version: 7.3
+      smc_address: http://127.0.0.1:8082
+      smc_logging:
+        level: 10
+        path: ansible-smc.log
+      interfaces:
+      - interface_id: '1001'
+        interfaces:
+        - nodes:
+          - address: 10.10.10.2
+            network_value: 10.10.10.2/32
+            nodeid: 1
+        type: tunnel_interface
+      - interface_id: '3'
+        interfaces:
+        - nodes:
+          - address: 31.31.31.31
+            network_value: 31.31.31.0/24
+            nodeid: 1
+          vlan_id: '1'
+      - interface_id: '4'
+        interfaces:
+        - nodes:
+          - address: 41.41.41.1
+            network_value: 41.41.41.0/24
+            nodeid: 1
+      name: myfw3
+      type: single_fw

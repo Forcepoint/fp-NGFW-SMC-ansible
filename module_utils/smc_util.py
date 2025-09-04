@@ -6,7 +6,17 @@ server.
 import inspect
 import logging
 import traceback
-from distutils.version import StrictVersion
+
+from smc.administration.system import System
+
+try:
+    from packaging.version import Version as StrictVersion
+except ImportError:
+    try:
+        from distutils.version import StrictVersion
+    except ImportError as e:
+        raise ImportError("Neither 'packaging' nor 'distutils' modules are available. "
+                          "Please install 'packaging'.") from e
 
 try:
     from ansible.module_utils.basic import AnsibleModule
@@ -461,6 +471,16 @@ def is_sixdotsix_compat():
         pass
     return result
 
+def is_licensed(name):
+    """
+    return true if element given by name is unlicensed
+    :rtype: bool
+    """
+    smc_system = System()
+    unlicensed=[]
+    for comp in smc_system.unlicensed_components():
+        unlicensed.append(comp.get("name"))
+    return not name in unlicensed
 
 def smc_argument_spec():
     return dict(

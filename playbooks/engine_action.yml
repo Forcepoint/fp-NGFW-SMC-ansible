@@ -2,25 +2,78 @@
   hosts: localhost
   gather_facts: no
   tasks:
-  - name: Generate initial config
+  - name: Get engine node status for myfw3, check if initial contact is needed
+    status_monitoring_facts:
+     smc_logging:
+       level: 10
+       path: ansible-smc.log
+     engine: myfw3
+     nodeid: 0
+    register: results
+
+  - name: Generate initial config if needed
     register: command_output
     engine_action:
       smc_logging:
         level: 10
-        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
+        path: ansible-smc.log
       name: myfw3
       nodeid: 0
       action: initial_contact
       extra_args:
         enable_ssh: true
         as_base64: true
+    when: results.ansible_facts.state.configuration_status == "Initial"
 
-  - debug: msg="{{ command_output.msg }}"
+  - name: Get engine node facts for myfw3, , check if bind license is needed
+    status_monitoring_facts:
+     smc_logging:
+       level: 10
+       path: ansible-smc.log
+     engine: myfw3
+     nodeid: 0
+    register: results
 
-  - name: Reboot node
+  - name: Bind license if needed
+    register: command_output
+    engine_action:
+      smc_logging:
+        level: 10
+        path: ansible-smc.log
+      name: myfw3
+      nodeid: 0
+      action: bind_license
+    when: not results.ansible_facts.licensed
+  - name: Upload policy
+    policy_push:
+      smc_logging:
+        level: 10
+        path: ansible-smc.log
+      name: myfw3
+      policy: asimpleanypolicy
+      wait_for_finish: yes
+      max_tries: 10
+      sleep: 3
+  - name: Wait for myfw3 node to be online
+    status_monitoring_facts:
+     smc_logging:
+       level: 10
+       path: ansible-smc.log
+     engine: myfw3
+     nodeid: 0
+    loop_control:
+      pause: 5
+    retries: 16
+    register: results
+    until: results.ansible_facts.state.monitoring_state == "READY"
+
+
+  - debug: msg="{{ results.ansible_facts.state }}"
+
+  - name: Rebooting engine node
     engine_action:
       name: myfw3
       nodeid: 0
-      action: go_online
+      action: reboot
       extra_args:
         comment: bringing back online

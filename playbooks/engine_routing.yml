@@ -2,44 +2,56 @@
   hosts: localhost
   gather_facts: no
   tasks:
-  - name: Add routing elements to engine
+
+  - name: Add static routing elements to myfw3 4 interface
     engine_routing:
       smc_logging:
         level: 10
         path: ansible-smc.log
-      name: _dhcpfw2
+      name: myfw3
+      static_route:
+        - destination:
+          - name: Any network
+            type: network
+          interface_id: '4'
+          name: myrouter4
+
+  - name: Add BGP routing elements to myfw3 1001 interface
+    engine_routing:
+      smc_logging:
+        level: 10
+        path: ansible-smc.log
+      name: myfw3
       bgp_peering:
-      - destination:
-        - name: bgppeer
-          type: external_bgp_peer
-        interface_id: '1000'
-        name: bgppeering
-      ospfv2_area:
-      - interface_id: '2.1'
-        name: myarea
-        network: 21.21.21.0/24
-        destination:
-        - name: myinterface
-          type: ospfv2_interface_settings
-      - name: myarea2
-        interface_id: 1
+        - destination:
+          - name: bgppeer2
+            type: external_bgp_peer
+          interface_id: '1001'
+          name: bgppeering
+
+  - name: Add netlink routing elements to myfw3 3.1 interface
+    engine_routing:
+      smc_logging:
+        level: 10
+        path: ansible-smc.log
+      name: myfw3
       netlink:
       - destination:
-        - name: IP_10.3.3.1
+        - name: host-3.3.3.3
           type: host
-        interface_id: '2.1'
-        name: netlink-21.21.21.0
-      static_route:
-      - destination:
-        - name: Any network
-          type: network
-        interface_id: 0
-        network: '1.1.1.0/24'
-        name: myrouter # Must be element of type Router
-      antispoofing_network:
-      - destination:
-        - name: foonet
-          type: network
-        interface_id: 0
-      state: absent
+        interface_id: '3.1'
+        name: netlink-31.31.31.0
 
+  - name: Add OSPF routing elements to myfw3 3.1 interface
+    engine_routing:
+      smc_logging:
+        level: 10
+        path: ansible-smc.log
+      name: myfw3
+      ospfv2_area:
+      - interface_id: '3.1'
+        name: myarea2
+        network: 31.31.31.0/24
+        destination:
+        - name: Default OSPFv2 Interface Settings
+          type: ospfv2_interface_settings

@@ -2,6 +2,6 @@
   hosts: localhost
   gather_facts: no
   tasks:
-  - name: Retrieve engine routes from sg_vm
+  - name: Retrieve engine routes from Plano
     engine_routing_facts:
-      filter: sg_vm
+      filter: Plano

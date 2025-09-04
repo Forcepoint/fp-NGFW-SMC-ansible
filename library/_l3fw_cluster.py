@@ -124,8 +124,8 @@ options:
       - Whether to enable default NAT on the firewall. Default NAT will identify
         internal networks and use the external interface IP for outgoing
         traffic
-    type: bool
-    default: false
+    type: str
+    default: automatic
   snmp:
     description:
       - SNMP settings for the engine
@@ -560,7 +560,7 @@ class ForcepointCluster(ForcepointModuleBase):
             comment=dict(type='str'),
             log_server=dict(type='str'),
             snmp=dict(type='dict', default={}),
-            default_nat=dict(type='bool'),
+            default_nat=dict(type='str'),
             antivirus=dict(type='bool'),
             file_reputation=dict(type='bool'),
             primary_mgt=dict(type='str'),
@@ -964,11 +964,8 @@ class ForcepointCluster(ForcepointModuleBase):
         changed = False
         if self.default_nat is not None:
             status = engine.default_nat.status
-            if not status and self.default_nat:
-                engine.default_nat.enable()
-                changed = True
-            elif status and not self.default_nat: # False or None
-                engine.default_nat.disable()
+            if str(self.default_nat).lower() != status:
+                engine.default_nat.status = self.default_nat
                 changed = True
         
         if self.file_reputation is not None:

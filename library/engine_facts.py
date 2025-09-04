@@ -341,7 +341,6 @@ def yaml_cluster(engine):
             continue
          
         if interface.has_interfaces:
-            _interfaces = []
             nodes = list()
             for sub_interface in interface.all_interfaces:
                 node = {}
@@ -373,24 +372,7 @@ def yaml_cluster(engine):
 
                 nodes.append(node)
             # segregate associated CVI's+ NID's
-            temp_dict = {}
-            dynamic_interface = list()
-            for node in nodes:
-                nv = node.get('network_value')
-                if nv:
-                    if nv not in temp_dict:
-                        temp_dict[nv] = {'nodes': []}
-                    if 'cluster_virtual' in node:
-                        temp_dict[nv].update(node)
-                    else:
-                        temp_dict[nv]['nodes'].append(node)
-                else:
-                    dynamic_interface.append(node)
-
-            nodes = list(temp_dict.values())
-            if nodes:
-                nodes[0]['nodes'].extend(dynamic_interface)
-                _interfaces.extend(nodes)
+            _interfaces = segregate_interfaces(nodes)
             if _interfaces:
                 top_itf.update(interfaces=_interfaces)
         
@@ -402,18 +384,16 @@ def yaml_cluster(engine):
                 if getattr(vlan, 'comment', None):
                     itf.update(comment=vlan.comment)
 
-                _interfaces = []    
-                nodes = {}
+                nodes = list()
                 if vlan.has_interfaces:
                     for sub_vlan in vlan.all_interfaces:
                         node = {}
 
                         if isinstance(sub_vlan, ClusterVirtualInterface):
-                            itf.update(
+                            node.update(
                                 cluster_virtual=sub_vlan.address,
                                 network_value=sub_vlan.network_value)
-                            continue
-                        else: # NDI
+                        else:  # NDI
                             # Dynamic address
                             if getattr(sub_vlan, 'dynamic', None):
                                 node.update(dynamic=True, dynamic_index=
@@ -427,20 +407,15 @@ def yaml_cluster(engine):
                             for role in management:
                                 if getattr(sub_vlan, role, None):
                                     yaml_engine[role] = getattr(sub_vlan, 'nicid')
-            
-                        if vlan.zone_ref:
-                            itf.update(zone_ref=zone_finder(
-                                zone_cache, vlan.zone_ref))
-                        
-                        nodes.setdefault('nodes', []).append(node)
-                        
-                    if nodes:
-                        _interfaces.append(nodes)
-                    if _interfaces:
-                        itf.update(nodes)
-                    
-                    top_itf.setdefault('interfaces', []).append(itf)
-            
+                        nodes.append(node)
+
+                    if vlan.zone_ref:
+                        itf.update(zone_ref=zone_finder(
+                            zone_cache, vlan.zone_ref))
+                    # segregate associated CVI's+ NID's
+                    _interfaces = segregate_interfaces(nodes, additional_info=itf)
+                    top_itf.update(interfaces=_interfaces)
+
                 else:
                     # Empty VLAN, check for zone
                     if vlan.zone_ref:
@@ -524,7 +499,32 @@ def yaml_cluster(engine):
     if tags:
         yaml_engine.update(tags=tags)
     return yaml_engine
-                    
+
+
+def segregate_interfaces(nodes, additional_info=None):
+    """Segregate interfaces into cluster virtual and NDI nodes"""
+    temp_dict = {}
+    _interfaces = dynamic_interfaces = []
+
+    for node in nodes:
+        nv = node.get('network_value')
+        if nv:
+            if nv not in temp_dict:
+                temp_dict[nv] = {'nodes': []}
+            if 'cluster_virtual' in node:
+                temp_dict[nv].update(node)
+            else:
+                temp_dict[nv]['nodes'].append(node)
+        else:
+            dynamic_interfaces.append(node)
+
+    nodes = [{**node, **(additional_info or {})} for node in temp_dict.values()]
+
+    # Merge dynamic interfaces
+    if nodes:
+        nodes[0]['nodes'].extend(dynamic_interfaces)
+    return list(nodes)
+
 
 def get_engine_dns(engine):
     """

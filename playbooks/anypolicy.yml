@@ -18,7 +18,7 @@
     firewall_rule:
       smc_logging:
         level: 10
-        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
+        path: ansible-smc.log
       policy: "{{policy_name}}"
       rules:
         - name: anyrule
@@ -55,3 +55,34 @@
           sources:
             network:
             - Internal Addresses
+  - name: Get first rule description as yaml
+    register: results
+    firewall_rule_facts:
+      smc_logging:
+       level: 10
+       path: ansible-smc.log
+      filter: "{{policy_name}}"
+      rule_range: 1-1
+      as_yaml: true
+
+  - debug: msg="First rule tag = {{ results.ansible_facts.firewall_rule[0].rules[0].tag }}"
+
+  - name: Add rule after
+    firewall_rule:
+      smc_logging:
+        level: 10
+        path: ansible-smc.log
+      policy: "{{policy_name}}"
+      rules:
+        - name: ruleafterfirst
+          comment: an allow rule added after
+          source:
+            any: true
+          destination:
+            any: true
+          services:
+            ip_service:
+              - TCP
+          log_options:
+             log_level: stored
+          add_after: "{{ results.ansible_facts.firewall_rule[0].rules[0].tag }}"

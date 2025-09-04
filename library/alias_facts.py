@@ -124,7 +124,7 @@ def alias_dict_from_obj(alias, engine):
     
 
 class AliasFacts(ForcepointModuleBase):
-    def __init__(self):
+    def __init__(self, unit_test=False):
         
         self.module_args = dict(
             engine=dict(type='str')
@@ -141,7 +141,8 @@ class AliasFacts(ForcepointModuleBase):
                 aliases=[]
             )
         )
-        super(AliasFacts, self).__init__(self.module_args, is_fact=True)
+        if not unit_test:
+            super(AliasFacts, self).__init__(self.module_args, is_fact=True)
 
     def exec_module(self, **kwargs):
         for name, value in kwargs.items():
@@ -158,9 +159,9 @@ class AliasFacts(ForcepointModuleBase):
         
         if self.engine and not self.filter:
             result = list(fw.alias_resolving())
-            aliases = [{'name': alias.name, 'type': alias.typeof, 'resolved_value': alias.resolved_value}
+            aliases = [{'name': alias.name, 'type': alias.typeof, 'resolved_value': alias.resolve(self.engine)}
                        for alias in result]
-    
+
         else:
                     
             result = self.search_by_type(Alias)

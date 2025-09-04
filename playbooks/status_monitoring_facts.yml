@@ -1,0 +1,17 @@
+- name: Examples of retrieving engine node status
+  hosts: localhost
+  gather_facts: no
+  tasks:
+
+  - name: Get engine node status for myfw3
+    register: results
+    status_monitoring_facts:
+      smc_logging:
+       level: 10
+       path: ansible-smc.log
+      engine: Plano
+      nodeid: 0
+
+
+    
+  

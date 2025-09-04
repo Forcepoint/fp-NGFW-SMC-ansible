@@ -197,6 +197,9 @@ class PolicyDeploy(ForcepointModuleBase):
                         
 
             self.results['msg'] = msg
+            if not task.task.success:
+                self.fail(msg=msg)
+
 
         except SMCException as err:
             self.fail(msg=str(err), exception=traceback.format_exc())

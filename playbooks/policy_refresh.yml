@@ -1,11 +1,14 @@
-- name: Create a new BGP configuration
+- name: Upload the policy
   hosts: localhost
   gather_facts: no
   tasks:
-  - name: Refresh policy
+  - name: Upload policy
     policy_push:
+      smc_logging:
+        level: 10
+        path: ansible-smc.log
       name: myfw3
-      policy: TestPolicy
+      policy: asimpleanypolicy
       wait_for_finish: yes
       max_tries: 10
       sleep: 3

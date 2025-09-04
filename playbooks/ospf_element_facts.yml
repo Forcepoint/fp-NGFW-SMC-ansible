@@ -28,6 +28,6 @@
       as_yaml: true
 
   - name: Write the yaml using a jinja template
-    template: src=templates/facts_yaml.j2 dest=./ospf_element.yml
+    template: src=templates/facts_yaml.j2 dest=./ospf_element_jinja.yml
     vars:
       playbook: ospf_element

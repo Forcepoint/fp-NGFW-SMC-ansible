@@ -1,41 +1,37 @@
-- name: Create an external gateway with external endpoints and VPN sites
+- name: 
   hosts: localhost
   gather_facts: no
   tasks:
-  - name: Task output
+  - name: Create a static IP based external gateway
     register: result
     external_gateway:
       smc_logging:
         level: 10
         path: ansible-smc.log
       external_endpoint:
-      -   address: 33.33.33.50
+      -   address: 33.33.33.41
           enabled: true
-          connection_type: Active 1
           name: extgw3 (33.33.33.41)
-      -   address: 45.45.45.45
-          enabled: true
-          connection_type: Active 1
-          name: newname
+          connection_type: 'Active'
       -   address: 34.34.34.34
           enabled: true
-          connection_type: Active 1
           name: endpoint2 (34.34.34.34)
+          connection_type: 'Active'
       -   address: 44.44.44.44
           enabled: true
-          connection_type: Standby 1
           name: extgw4 (44.44.44.44)
+          connection_type: 'Standby'
       -   address: 33.33.33.50
           enabled: true
-          connection_type: Standby 1
           name: endpoint1 (33.33.33.50)
-      name: extgw3
+          connection_type: 'Aggregate'
+      name: myexternalgateway1
       vpn_site:
           group:
-          - hostgroup
+          - group1
           host:
           - hosta
-          name: site12
+          name: site12a
           network:
-          - network-172.18.1.0/24
-          - network-172.18.2.0/24
+          - networka
+          - mynetwork2

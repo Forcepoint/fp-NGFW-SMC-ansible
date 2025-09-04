@@ -7,18 +7,19 @@
   
   - name: Find route maps with my in the name
     route_map_facts:
-      filter: anewmap
+      filter: myroutemap
   
   - name: Get route map details for myroutemap
     register: results
     route_map_facts:
+      filter: myroutemap
       smc_logging:
         level: 10
         path: ansible-smc.log
       as_yaml: true
 
   - name: Write the yaml using a jinja template
-    template: src=templates/facts_yaml.j2 dest=./route_map2.yml
+    template: src=templates/facts_yaml.j2 dest=./route_map_jinja.yml
     vars:
       playbook: route_map
     

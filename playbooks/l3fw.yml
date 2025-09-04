@@ -4,11 +4,11 @@
   tasks:
   - name: Firewall template
     engine:
-      smc_api_version: 7.1
+      smc_api_version: 7.3
       smc_address: http://127.0.0.1:8082
       smc_logging:
         level: 10
-        path: "{{log_folder| default('/tmp')}}/ansible-smc.log"
+        path: ansible-smc.log
       antispoofing_network:
         group:
         - group1
@@ -40,7 +40,7 @@
         type: ipaddress
       - name: Localhost
         type: host
-      file_reputation: true
+      file_reputation: false
       interfaces:
       - interface_id: '1000'
         interfaces:
@@ -107,5 +107,5 @@
         snmp_agent: fooagent
         snmp_interface:
         - '1'
-        snmp_location: test
+        snmp_location: snmp_location
       type: single_fw

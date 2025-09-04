@@ -131,8 +131,8 @@ options:
       - Whether to enable default NAT on the firewall. Default NAT will identify
         internal networks and use the external interface IP for outgoing
         traffic
-    type: bool
-    default: false
+    type: str
+    default: automatic
   antispoofing_network:
     description:
       - Antispoofing networks are automatically added to the route antispoofing
@@ -800,7 +800,7 @@ class ForcepointEngine(ForcepointModuleBase):
             comment=dict(type='str'),
             log_server=dict(type='str'),
             snmp=dict(type='dict', default={}),
-            default_nat=dict(type='bool'),
+            default_nat=dict(type='str'),
             antivirus=dict(type='bool'),
             file_reputation=dict(type='bool'),
             primary_mgt=dict(type='str'),
@@ -1104,6 +1104,7 @@ class ForcepointEngine(ForcepointModuleBase):
                     
                     if 'fw_cluster' in self.type:
                         firewall.update(
+                            nodes=len(interfaces[0].get("interfaces")[0].get("nodes")),
                             cluster_mode=self.cluster_mode,
                             primary_heartbeat=self.primary_heartbeat)
                         
@@ -1355,7 +1356,7 @@ class ForcepointEngine(ForcepointModuleBase):
         :rtype: bool
         """
         changed = False
-        for feature in ('default_nat', 'file_reputation', 'antivirus'):
+        for feature in ('file_reputation', 'antivirus'):
             if getattr(self, feature, None) is not None:
                 status = getattr(engine, feature).status
                 if not status and getattr(self, feature):
@@ -1371,6 +1372,11 @@ class ForcepointEngine(ForcepointModuleBase):
 #                         'name': feature,
 #                         'type': 'addon',
 #                         'action': 'updated'})
+
+        status = engine.default_nat.status
+        if self.default_nat is not None and str(self.default_nat).lower() != status:
+            engine.default_nat.status = self.default_nat
+            changed = True
         
         if self.domain_server_address:
             dns_elements = [d.value if d.value else d.element

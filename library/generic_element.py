@@ -117,7 +117,7 @@ logger = logging.getLogger("smc")
 
 
 class GenericElement(ForcepointModuleBase):
-    def __init__(self):
+    def __init__(self, unit_test=False):
 
         self.module_args = dict(
             elements=dict(type='list', required=True),
@@ -132,7 +132,10 @@ class GenericElement(ForcepointModuleBase):
 
         self.check_mode = False
 
-        super(GenericElement, self).__init__(self.module_args, supports_check_mode=True)
+        self.unit_test = unit_test
+
+        if not unit_test:
+            super(GenericElement, self).__init__(self.module_args, supports_check_mode=True)
 
     def exec_module(self, **kwargs):
         logger.debug("data={}".format(kwargs))

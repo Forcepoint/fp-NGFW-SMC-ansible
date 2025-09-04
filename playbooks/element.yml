@@ -46,15 +46,31 @@
           neighbor_ip: 192.168.14.101
           neighbor_as:
             smc-reference: autonomous system 1
+      - external_bgp_peer:
+          name: bgppeer2
+          neighbor_ip: 192.168.14.102
+          neighbor_as:
+            smc-reference: autonomous system 1
       - route_map:
           name: myroutemap
       - vpn:
           name: new_policy_vpn
+          vpn_profile:
+            smc-reference: MyVPNProfile
       - ospfv2_area:
           name: myarea
       - network:
           name: network-50.50.50.0/24
           ipv4_network: 50.50.50.0/24
+      - network:
+          name: network-1.1.1.0/24
+          ipv4_network: 1.1.1.0/24
+      - network:
+          name: network-5.5.5.0/24
+          ipv4_network: 5.5.5.0/24
+      - network:
+          name: network-41.41.41.0/24
+          ipv4_network: 41.41.41.0/24
       - host:
           name: host-2.2.2.23
           address: 2.2.2.23
@@ -69,15 +85,36 @@
       - router:
           name: myrouter2
           address: 21.21.21.13
+      - router:
+          name: myrouter3
+          address: 31.31.31.13
+      - router:
+          name: myrouter4
+          address: 41.41.41.13
       - network:
           name: mynetwork2
           ipv4_network: 13.13.13.0/24
+      - network:
+          name: mynetwork3
+          ipv4_network: 14.14.14.0/24
       - netlink:
           name: netlink-21.21.21.0
           gateway:
             smc-reference: myrouter2
           network:
           - smc-reference: mynetwork2
+          domain_server_address:
+              - 8.8.8.8
+              - 8.8.7.7
+          probe_address:
+              - 10.10.10.1
+          comment: added by ansible
+      - netlink:
+          name: netlink-31.31.31.0
+          gateway:
+            smc-reference: myrouter3
+          network:
+          - smc-reference: mynetwork3
           domain_server_address:
               - 8.8.8.8
               - 8.8.7.7
