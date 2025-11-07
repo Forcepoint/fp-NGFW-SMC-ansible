@@ -63,7 +63,7 @@
      nodeid: 0
     loop_control:
       pause: 5
-    retries: 16
+    retries: 20
     register: results
     until: results.ansible_facts.state.monitoring_state == "READY"
 

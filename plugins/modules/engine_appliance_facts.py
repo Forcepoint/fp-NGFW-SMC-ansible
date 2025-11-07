@@ -313,7 +313,7 @@ items = ('status', 'interfaces', 'filesystem')
                     
  
 class EngineApplianceFacts(ForcepointModuleBase):
-    def __init__(self):
+    def __init__(self, unit_test=False):
         
         self.module_args = dict(
             filter=dict(type='str', required=True),
@@ -323,7 +323,7 @@ class EngineApplianceFacts(ForcepointModuleBase):
     
         self.element = 'engine_clusters'
         self.nodeid = None
-        self.items = None # Filters to only obtain specific details
+        self.items = [] # Filters to only obtain specific details
         self.limit = None
         self.filter = None # Engine name
         self.as_yaml = None # Ignored for this fact type
@@ -335,7 +335,8 @@ class EngineApplianceFacts(ForcepointModuleBase):
                 engines=[]
             )
         )
-        super(EngineApplianceFacts, self).__init__(self.module_args, is_fact=True)
+        if not unit_test:
+            super(EngineApplianceFacts, self).__init__(self.module_args, is_fact=True)
 
     def exec_module(self, **kwargs):
         for name, value in kwargs.items():
