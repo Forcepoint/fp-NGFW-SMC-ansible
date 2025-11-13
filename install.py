@@ -68,11 +68,11 @@ def main():
         os.remove(os.path.join(lookup_path, 'smc_lookup.pyc'))
 
     here_lookup = os.path.join(here, 'plugins/lookup')
-    shutil.copy(os.path.join(here_lookup, 'smc-reference.py'),
-                os.path.join(lookup_path, 'smc-reference.py'))
-    shutil.copy(os.path.join(here_lookup, 'smc-element.py'),
-                os.path.join(lookup_path, 'smc-element.py'))
-    print("Copying smc-reference.py/smc-element.py to: %s" % lookup_path)
+    shutil.copy(os.path.join(here_lookup, 'smc_reference.py'),
+                os.path.join(lookup_path, 'smc_reference.py'))
+    shutil.copy(os.path.join(here_lookup, 'smc_element.py'),
+                os.path.join(lookup_path, 'smc_element.py'))
+    print("Copying smc_reference.py/smc_element.py to: %s" % lookup_path)
 
 
 if __name__ == '__main__':

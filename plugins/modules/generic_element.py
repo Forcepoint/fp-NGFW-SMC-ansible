@@ -168,7 +168,7 @@ class GenericElement(ForcepointModuleBase):
                         for attribute, value in data.copy().items():
                             logger.debug("attribute={} value={}".format(attribute, value))
                             if type(value) is dict:
-                                reference_name = value.get("smc-reference")
+                                reference_name = value.get("smc_reference")
                                 if reference_name is not None:
                                     result = fetch_meta_by_name(reference_name)
                                     if len(result.json) == 0:
@@ -180,7 +180,7 @@ class GenericElement(ForcepointModuleBase):
                                 for sub_value in value.copy():
                                     logger.debug("Updated: sub-value={}".format(sub_value))
                                     if type(sub_value) is dict:
-                                        reference_name = sub_value.get("smc-reference")
+                                        reference_name = sub_value.get("smc_reference")
                                         if reference_name is not None:
                                             result = fetch_meta_by_name(reference_name)
                                             if len(result.json) == 0:

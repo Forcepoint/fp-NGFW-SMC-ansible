@@ -45,18 +45,18 @@
           name: bgppeer
           neighbor_ip: 192.168.14.101
           neighbor_as:
-            smc-reference: autonomous system 1
+            smc_reference: autonomous system 1
       - external_bgp_peer:
           name: bgppeer2
           neighbor_ip: 192.168.14.102
           neighbor_as:
-            smc-reference: autonomous system 1
+            smc_reference: autonomous system 1
       - route_map:
           name: myroutemap
       - vpn:
           name: new_policy_vpn
           vpn_profile:
-            smc-reference: MyVPNProfile
+            smc_reference: MyVPNProfile
       - ospfv2_area:
           name: myarea
       - network:
@@ -80,8 +80,8 @@
       - group:
           name: group1
           members:
-          - smc-reference: host-2.2.2.23
-          - smc-reference: host-3.3.3.3
+          - smc_reference: host-2.2.2.23
+          - smc_reference: host-3.3.3.3
       - router:
           name: myrouter2
           address: 21.21.21.13
@@ -100,9 +100,9 @@
       - netlink:
           name: netlink-21.21.21.0
           gateway:
-            smc-reference: myrouter2
+            smc_reference: myrouter2
           network:
-          - smc-reference: mynetwork2
+          - smc_reference: mynetwork2
           domain_server_address:
               - 8.8.8.8
               - 8.8.7.7
@@ -112,9 +112,9 @@
       - netlink:
           name: netlink-31.31.31.0
           gateway:
-            smc-reference: myrouter3
+            smc_reference: myrouter3
           network:
-          - smc-reference: mynetwork3
+          - smc_reference: mynetwork3
           domain_server_address:
               - 8.8.8.8
               - 8.8.7.7
