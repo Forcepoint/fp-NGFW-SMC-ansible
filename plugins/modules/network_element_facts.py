@@ -128,7 +128,7 @@ elements:
     }]
 '''
 
-from ansible.module_utils.smc_util import (
+from ansible_collections.forcepoint.fp_ngfw_smc_ansible.plugins.module_utils.smc_util import (
     ForcepointModuleBase,
     element_type_dict,
     ro_element_type_dict,

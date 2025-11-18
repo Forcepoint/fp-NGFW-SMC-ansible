@@ -1,4 +1,6 @@
 - name: createANYpolicy
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
   hosts: localhost
   vars:
     policy_name: asimpleanypolicy

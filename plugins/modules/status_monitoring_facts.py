@@ -103,7 +103,7 @@ status_monitoring_facts:
    }
 '''
 
-from ansible.module_utils.smc_util import ForcepointModuleBase, is_licensed
+from ansible_collections.forcepoint.fp_ngfw_smc_ansible.plugins.module_utils.smc_util import ForcepointModuleBase, is_licensed
 
 try:
     from smc.core.engine import Engine

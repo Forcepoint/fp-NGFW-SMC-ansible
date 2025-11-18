@@ -1,4 +1,6 @@
-- name: 
+- name: Create BGP Elements
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
   hosts: localhost
   gather_facts: no
   tasks:

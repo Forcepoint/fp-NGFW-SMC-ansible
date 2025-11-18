@@ -150,7 +150,7 @@ elements:
 
 '''
 
-from ansible.module_utils.smc_util import ForcepointModuleBase, format_element
+from ansible_collections.forcepoint.fp_ngfw_smc_ansible.plugins.module_utils.smc_util import ForcepointModuleBase, format_element
 
 
 try:

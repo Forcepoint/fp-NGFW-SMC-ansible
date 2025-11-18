@@ -306,7 +306,7 @@ state:
   type: dict
 '''
 
-from ansible.module_utils.smc_util import ForcepointModuleBase, Cache
+from ansible_collections.forcepoint.fp_ngfw_smc_ansible.plugins.module_utils.smc_util import ForcepointModuleBase, Cache
 
 try:
     from smc.base.model import lookup_class

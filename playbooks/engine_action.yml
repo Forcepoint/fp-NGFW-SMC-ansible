@@ -1,4 +1,6 @@
 - name: Firewall Actions (run after l3fw.yml)
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
   hosts: localhost
   gather_facts: no
   tasks:

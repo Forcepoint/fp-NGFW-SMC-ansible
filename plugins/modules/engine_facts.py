@@ -218,7 +218,7 @@ engines:
         "type": "single_fw"
     }]
 '''
-from ansible.module_utils.smc_util import ForcepointModuleBase
+from ansible_collections.forcepoint.fp_ngfw_smc_ansible.plugins.module_utils.smc_util import ForcepointModuleBase
 
 
 ENGINE_TYPES = frozenset(['fw_clusters', 'engine_clusters', 'ips_clusters',

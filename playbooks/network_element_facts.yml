@@ -1,6 +1,9 @@
 - name: Obtain facts about Network Elements
   hosts: localhost
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
   gather_facts: no
+
   tasks:
   - name: Retrieve all Group level objects, limit of 50
     network_element_facts:

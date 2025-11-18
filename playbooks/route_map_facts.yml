@@ -1,4 +1,6 @@
 - name: Facts about dynamic routing route maps
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
   hosts: localhost
   gather_facts: no
   tasks:

@@ -1,4 +1,6 @@
 - name: Facts related to external VPN gateways
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
   hosts: localhost
   gather_facts: no
   tasks:

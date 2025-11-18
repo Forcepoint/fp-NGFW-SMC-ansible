@@ -1,4 +1,6 @@
 - name: Examples of retrieving engine node status
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
   hosts: localhost
   gather_facts: no
   tasks:

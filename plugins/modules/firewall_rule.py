@@ -496,8 +496,8 @@ import traceback
 from ansible.module_utils.six import integer_types
 from ansible.module_utils.six import string_types
 
-from ansible.module_utils.smc_util import (
-    ForcepointModuleBase, Cache, is_sixdotsix_compat)
+from ansible_collections.forcepoint.fp_ngfw_smc_ansible.plugins.module_utils.smc_util \
+    import (ForcepointModuleBase, Cache, is_sixdotsix_compat)
 
 
 try:

@@ -160,7 +160,7 @@ firewall_rule:
     }]
 '''
 import traceback
-from ansible.module_utils.smc_util import ForcepointModuleBase
+from ansible_collections.forcepoint.fp_ngfw_smc_ansible.plugins.module_utils.smc_util import ForcepointModuleBase
 
 try:
     from smc.api.exceptions import SMCException

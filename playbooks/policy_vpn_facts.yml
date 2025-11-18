@@ -1,4 +1,6 @@
 - name: Facts related to Policy VPN
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
   hosts: localhost
   gather_facts: no
   tasks:

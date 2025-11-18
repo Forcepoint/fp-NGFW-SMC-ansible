@@ -1,4 +1,6 @@
 - name: Examples for retrieving and resolving Aliases
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
   hosts: localhost
   gather_facts: no
   tasks:

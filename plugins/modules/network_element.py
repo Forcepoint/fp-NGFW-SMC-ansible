@@ -418,7 +418,7 @@ state:
 
 import copy
 import traceback
-from ansible.module_utils.smc_util import (
+from ansible_collections.forcepoint.fp_ngfw_smc_ansible.plugins.module_utils.smc_util  import (
     ForcepointModuleBase, Cache, element_type_dict,
     ro_element_type_dict, update_or_create, delete_element)
 
