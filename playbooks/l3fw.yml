@@ -70,20 +70,21 @@
           - address: 1.1.1.1
             network_value: 1.1.1.0/24
             nodeid: 1
-      - interface_id: SWI_0
-        appliance_switch_module: 110 appliance (8 fixed ports)
-        type: switch_interface
-        port_group_interface:
-        - interface_id: SWI_0.4
-          switch_interface_port:
-          - switch_interface_port_comment: port 2
-            physical_switch_port_number: 2
-          - switch_interface_port_comment: ''
-            physical_switch_port_number: 4
-          - switch_interface_port_comment: ''
-            physical_switch_port_number: 5
-          - switch_interface_port_comment: ''
-            physical_switch_port_number: 6
+# Not supported anymore in SMC 7.5 and more
+#      - interface_id: SWI_0
+#        appliance_switch_module: 110 appliance (8 fixed ports)
+#        type: switch_interface
+#        port_group_interface:
+#        - interface_id: SWI_0.4
+#          switch_interface_port:
+#          - switch_interface_port_comment: port 2
+#            physical_switch_port_number: 2
+#          - switch_interface_port_comment: ''
+#            physical_switch_port_number: 4
+#          - switch_interface_port_comment: ''
+#            physical_switch_port_number: 5
+#          - switch_interface_port_comment: ''
+#            physical_switch_port_number: 6
       name: myfw3
       netlinks:
       - destination:

@@ -1,0 +1,206 @@
+- name: Engine Session Monitoring Facts
+  hosts: localhost
+  gather_facts: no
+
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
+
+  vars:
+    # Override at runtime with: -e "engine_name=Plano"
+    engine_name: Plano
+
+    # Where to write the SMC API log (override with -e "log_folder=/var/log/forcepoint")
+    log_folder: "/tmp"
+
+    # Where to save the neighbor pretty dump (override with -e "neighbor_out_file=/path/file.json")
+    neighbor_out_file: "{{ log_folder }}/neighbor_items.json"
+
+  tasks:
+
+    # -----------------------------
+    # Connection monitoring
+    # -----------------------------
+    - name: Retrieve connection monitoring for engine "{{ engine_name }}"
+      register: conn_mon
+      engine_session_monitoring:
+        filter: "{{ engine_name }}"
+        sesmon_type: connection_monitoring
+        full: true
+        smc_logging:
+          path: "{{ log_folder }}/ansible-smc.log"
+          level: 10
+
+    - name: Prepare connection items (first 10) as YAML-friendly object
+      ansible.builtin.set_fact:
+        conn_items_preview: >-
+          {{ ((conn_mon.ansible_facts.engine_session_monitoring | default({}))['items'] | default([]))[:10] }}
+
+    - name: Pretty-print connection items (first 10)
+      ansible.builtin.debug:
+        var: conn_items_preview
+
+    - name: Show connection monitoring count
+      ansible.builtin.debug:
+        msg: "Connections count for {{ engine_name }}: {{ conn_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+
+    # -----------------------------
+    # SSL VPN user monitoring
+    # -----------------------------
+    - name: Retrieve SSL VPN user monitoring (case-insensitive) for "{{ engine_name }}"
+      register: sslvpn_mon
+      engine_session_monitoring:
+        filter: "{{ engine_name }}"
+        sesmon_type: sslvpn_monitoring
+        exact_match: true
+        case_sensitive: false
+        full: true
+        smc_logging:
+          path: "{{ log_folder }}/ansible-smc.log"
+          level: 10
+
+    - name: Prepare SSL VPN items (first 10) as YAML-friendly object
+      ansible.builtin.set_fact:
+        sslvpn_items_preview: >-
+          {{ ((sslvpn_mon.ansible_facts.engine_session_monitoring | default({}))['items'] | default([]))[:10] }}
+
+    - name: Pretty-print SSL VPN items (first 10)
+      ansible.builtin.debug:
+        var: sslvpn_items_preview
+
+    - name: Show SSL VPN user monitoring count
+      ansible.builtin.debug:
+        msg: "SSL VPN entries for {{ engine_name }}: {{ sslvpn_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+
+    # -----------------------------
+    # VPN SA monitoring
+    # -----------------------------
+    - name: Retrieve VPN SA monitoring with API logging enabled
+      register: vpnsa_mon
+      engine_session_monitoring:
+        filter: "{{ engine_name }}"
+        sesmon_type: vpnsa_monitoring
+        full: true
+        smc_logging:
+          path: "{{ log_folder }}/ansible-smc.log"
+          level: 10
+
+    - name: Prepare VPN SA items (first 10) as YAML-friendly object
+      ansible.builtin.set_fact:
+        vpnsa_items_preview: >-
+          {{ ((vpnsa_mon.ansible_facts.engine_session_monitoring | default({}))['items'] | default([]))[:10] }}
+
+    - name: Pretty-print VPN SA items (first 10)
+      ansible.builtin.debug:
+        var: vpnsa_items_preview
+
+    - name: Show VPN SA monitoring count
+      ansible.builtin.debug:
+        msg: "VPN SA entries for {{ engine_name }}: {{ vpnsa_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+
+    # -----------------------------
+    # Routing monitoring (.smcrc demo)
+    # -----------------------------
+    - name: Retrieve routing monitoring using ~/.smcrc
+      register: routing_mon
+      engine_session_monitoring:
+        filter: "{{ engine_name }}"
+        sesmon_type: routing_monitoring
+        full: true
+        smc_alt_filepath: "{{ lookup('env','HOME') }}/.smcrc"
+        smc_logging:
+          path: "{{ log_folder }}/ansible-smc.log"
+          level: 10
+
+    - name: Prepare routing items (first 10) as YAML-friendly object
+      ansible.builtin.set_fact:
+        routing_items_preview: >-
+          {{ ((routing_mon.ansible_facts.engine_session_monitoring | default({}))['items'] | default([]))[:10] }}
+
+    - name: Pretty-print routing items (first 10)
+      ansible.builtin.debug:
+        var: routing_items_preview
+
+    - name: Show routing monitoring count
+      ansible.builtin.debug:
+        msg: "Routing monitoring entries for {{ engine_name }}: {{ routing_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+
+    # -----------------------------
+    # Neighbor monitoring
+    # -----------------------------
+    - name: Retrieve neighbor monitoring for "{{ engine_name }}"
+      register: neigh_mon
+      engine_session_monitoring:
+        filter: "{{ engine_name }}"
+        sesmon_type: neighbor_monitoring
+        full: true
+        smc_logging:
+          path: "{{ log_folder }}/ansible-smc.log"
+          level: 10
+
+    - name: Prepare neighbor items (first 10) as YAML-friendly object
+      ansible.builtin.set_fact:
+        neigh_items_preview: >-
+          {{ ((neigh_mon.ansible_facts.engine_session_monitoring | default({}))['items'] | default([]))[:10] }}
+
+    - name: Pretty-print neighbor items (first 10)
+      ansible.builtin.debug:
+        var: neigh_items_preview
+
+    - name: Save neighbor items (first 10) as pretty JSON
+      ansible.builtin.copy:
+        dest: "{{ neighbor_out_file }}"
+        content: "{{ neigh_items_preview | to_nice_json }}"
+        mode: "0644"
+
+    - name: Show neighbor monitoring count
+      ansible.builtin.debug:
+        msg: "Neighbor entries for {{ engine_name }}: {{ neigh_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+
+    # -----------------------------
+    # User monitoring
+    # -----------------------------
+    - name: Retrieve user monitoring for "{{ engine_name }}"
+      register: user_mon
+      engine_session_monitoring:
+        filter: "{{ engine_name }}"
+        sesmon_type: user_monitoring
+        full: true
+        smc_logging:
+          path: "{{ log_folder }}/ansible-smc.log"
+          level: 10
+
+    - name: Prepare user items (first 10) as YAML-friendly object
+      ansible.builtin.set_fact:
+        user_items_preview: >-
+          {{ ((user_mon.ansible_facts.engine_session_monitoring | default({}))['items'] | default([]))[:10] }}
+
+    - name: Pretty-print user items (first 10)
+      ansible.builtin.debug:
+        var: user_items_preview
+
+    - name: Show user monitoring count
+      ansible.builtin.debug:
+        msg: "User monitoring entries for {{ engine_name }}: {{ user_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+
+    # -----------------------------
+    # Summary
+    # -----------------------------
+    - name: Optional - summarize all counts
+      ansible.builtin.debug:
+        msg:
+          engine: "{{ engine_name }}"
+          connection_count: "{{ conn_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+          sslvpn_count: "{{ sslvpn_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+          vpnsa_count: "{{ vpnsa_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+          routing_count: "{{ routing_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+          neighbor_count: "{{ neigh_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+          user_count: "{{ user_mon.ansible_facts.engine_session_monitoring.count | default(0) }}"
+
+    # -----------------------------
+    # Where is the log file / neighbor file?
+    # -----------------------------
+    - name: Show file locations
+      ansible.builtin.debug:
+        msg:
+          smc_api_log: "{{ log_folder }}/ansible-smc.log"
+          neighbor_items_file: "{{ neighbor_out_file }}"

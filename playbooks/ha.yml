@@ -1,0 +1,38 @@
+- name: Examples of high availability commands
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
+  hosts: localhost
+  gather_facts: no
+  tasks:
+
+  - name: Launch full replication
+    ha:
+      smc_logging:
+       level: 10
+       path: ansible-smc.log
+      name: Management Server
+      operation: full_replication
+
+  - name: Exclude from replication
+    ha:
+      smc_logging:
+       level: 10
+       path: ansible-smc.log
+      name: Management Server
+      operation: exclude
+
+  - name: Launch activation of the specified management server
+    ha:
+      smc_logging:
+       level: 10
+       path: ansible-smc.log
+      name: Management Server
+      operation: set_active
+
+  - name: Launch deactivation of the specified management server
+    ha:
+      smc_logging:
+       level: 10
+       path: ansible-smc.log
+      name: Management Server
+      operation: set_standby

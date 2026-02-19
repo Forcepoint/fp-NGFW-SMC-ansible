@@ -1,0 +1,12 @@
+- name: Examples of retrieving HA facts
+  collections:
+    - forcepoint.fp_ngfw_smc_ansible
+  hosts: localhost
+  gather_facts: no
+  tasks:
+
+  - name: Get High Availability details
+    ha_facts:
+      smc_logging:
+       level: 10
+       path: ansible-smc.log
