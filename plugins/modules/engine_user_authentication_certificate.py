@@ -184,10 +184,7 @@ METHODS = {
     'generate_and_sign_certificate': 'generate_and_sign_user_authentication_certificate'
 }
 
-EXPORT_RESOURCES = {
-    'export_request': 'web_auth_https_export_certificate_request',
-    'export_certificate': 'web_auth_https_export_certificate'
-}
+READ_ONLY_ACTIONS = ('export_request', 'export_certificate')
 
 
 class ForcepointEngineUserAuthenticationCertificate(ForcepointModuleBase):
@@ -231,35 +228,12 @@ class ForcepointEngineUserAuthenticationCertificate(ForcepointModuleBase):
 
             self.check_provided_args(engine, method_name)
 
-            # Export actions remain executable in check mode because they only
-            # read data. Every other action is mutating, so check mode reports
-            # the predicted change without calling smc-python.
-            if self.check_mode and self.action not in EXPORT_RESOURCES:
+            if self.check_mode and self.action not in READ_ONLY_ACTIONS:
                 self.results['changed'] = True
                 return self.results
 
-            if self.action in EXPORT_RESOURCES:
-                export_resource = EXPORT_RESOURCES[self.action]
-
-                # engine.data.links is a mapping of relation names to request
-                # URLs built by smc-python from the links advertised by SMC.
-                # SMC only advertises an export relation when the corresponding
-                # CSR or certificate is available on this engine.
-                if export_resource not in engine.data.links:
-                    # Do not call the SDK export method when the relation is
-                    # absent. smc-python would otherwise fail while resolving
-                    # the missing link and raise CertificateExportError. Here,
-                    # the missing relation is normal state, not an export error.
-                    result = None
-                else:
-                    # Once SMC advertises the relation, call the SDK normally.
-                    # Any failure after this point remains a genuine export error
-                    # and is handled by the module's SMCException handler.
-                    result = method(**self.extra_args)
-
-            elif self.action == 'import_certificate':
+            if self.action == 'import_certificate':
                 result = method(self.certificate, **self.extra_args)
-
             else:
                 result = method(**self.extra_args)
 
@@ -288,10 +262,6 @@ class ForcepointEngineUserAuthenticationCertificate(ForcepointModuleBase):
 
     @staticmethod
     def build_content_result(content):
-        # Export methods normally return PEM data as bytes. A missing export
-        # relation is represented by content=None, and an empty successful HTTP
-        # response can be represented by empty bytes or an empty string. Normalize
-        # all of those absence cases to the same stable Ansible result structure.
         if content is None:
             return {'content': None}
         if isinstance(content, bytes):
